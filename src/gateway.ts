@@ -66,6 +66,11 @@ initSlackClients({ botToken: SLACK_BOT_TOKEN, appToken: SLACK_APP_TOKEN });
 // Optional: directory the spawned `claude -p` runs in (for tool/file access)
 const CLAUDE_CWD = process.env.GATEWAY_CLAUDE_CWD || projectRoot;
 const REPLY_TIMEOUT_MS = Number(process.env.GATEWAY_REPLY_TIMEOUT_MS || 180_000);
+// Long-task timeout (e.g. channel summary, multi-tool chains). Set
+// GATEWAY_REPLY_TIMEOUT_MS_LONG to override; defaults to 2× the normal timeout.
+const REPLY_TIMEOUT_MS_LONG = Number(
+  process.env.GATEWAY_REPLY_TIMEOUT_MS_LONG || REPLY_TIMEOUT_MS * 2
+);
 // Max concurrent `claude -p` replies. Excess events queue and run as slots free.
 const maxConcurrentRaw = Number(process.env.GATEWAY_MAX_CONCURRENT || 3);
 const MAX_CONCURRENT =
@@ -344,9 +349,26 @@ async function processEvent(
   let heartbeatTimer: NodeJS.Timeout | undefined;
   let progressDone = false;
   let progressChain = Promise.resolve();
+  let placeholderTs: string | undefined;
+
+  // Use the long timeout for resume turns (established sessions tend to be
+  // longer tasks — the user has already context-built). Fresh sessions get
+  // the normal timeout. Both are configurable via env vars.
+  const isResume = sessionStore.getOrCreate(tKey).started;
+  const timeoutMs = isResume ? REPLY_TIMEOUT_MS_LONG : REPLY_TIMEOUT_MS;
 
   // Wait for a global concurrency slot (queues if MAX_CONCURRENT reached).
   await acquireSlot();
+
+  /** Stop heartbeat + wait for the progress update queue to drain. */
+  const stopProgress = async (): Promise<void> => {
+    if (heartbeatTimer) {
+      clearInterval(heartbeatTimer);
+      heartbeatTimer = undefined;
+    }
+    progressDone = true;
+    await progressChain;
+  };
 
   try {
     await enrichEvent(event); // resolve user_name / channel_name (best effort)
@@ -354,7 +376,7 @@ async function processEvent(
     const session = sessionStore.getOrCreate(tKey);
     const resume = session.started;
     console.error(
-      `[gateway] reply (${running}/${MAX_CONCURRENT} slots) ` +
+      `[gateway] reply (${running}/${MAX_CONCURRENT} slots, timeout ${timeoutMs / 1000}s) ` +
         `${resume ? "resume" : "new"} session ${session.sessionId.slice(0, 8)} ` +
         `for ${event.type} from ${event.user_name || event.user} in ` +
         `${event.channel_name || event.channel}`
@@ -363,7 +385,6 @@ async function processEvent(
     const prompt = await buildPrompt(event, resume);
 
     // --- live progress: post a placeholder, then edit it in place ---
-    let placeholderTs: string | undefined;
     let lastUpdate = 0;
     let lastLabel = "";
     let lastToolAt = 0;
@@ -409,7 +430,7 @@ async function processEvent(
     }
 
     const result = await generateReply(prompt, {
-      timeoutMs: REPLY_TIMEOUT_MS,
+      timeoutMs,
       cwd: CLAUDE_CWD,
       sessionId: session.sessionId,
       resume,
@@ -420,19 +441,11 @@ async function processEvent(
       },
     });
 
-    if (heartbeatTimer) {
-      clearInterval(heartbeatTimer);
-      heartbeatTimer = undefined;
-    }
-    progressDone = true;
-    await progressChain;
+    await stopProgress();
 
     if (result.ok) {
-      // First successful turn establishes the session; later turns resume it.
       sessionStore.markStarted(tKey);
     } else if (!resume) {
-      // A brand-new session failed to start — drop the mapping so the next
-      // turn mints a fresh UUID rather than trying to --resume a non-session.
       sessionStore.reset(tKey);
     }
 
@@ -441,7 +454,6 @@ async function processEvent(
       : `:warning: 抱歉，我暂时无法生成回复（${result.error}）。`;
 
     if (placeholderTs) {
-      // Replace the placeholder with the final reply.
       await web.chat.update({
         channel: event.channel,
         ts: placeholderTs,
@@ -461,12 +473,25 @@ async function processEvent(
     );
   } catch (err) {
     console.error("[gateway] reply failed:", (err as Error).message);
+    // Drain the progress queue first so the placeholder is in a stable state,
+    // then overwrite it with the error (rather than leaving it stuck on the
+    // last tool label forever).
+    await stopProgress();
     try {
-      await web.chat.postMessage({
-        channel: event.channel,
-        thread_ts: replyThreadTs,
-        text: `:warning: 回复时出错：${(err as Error).message}`,
-      });
+      const errText = `:warning: 回复时出错：${(err as Error).message}`;
+      if (placeholderTs) {
+        await web.chat.update({
+          channel: event.channel,
+          ts: placeholderTs,
+          text: errText,
+        });
+      } else {
+        await web.chat.postMessage({
+          channel: event.channel,
+          thread_ts: replyThreadTs,
+          text: errText,
+        });
+      }
     } catch {
       // give up
     }
