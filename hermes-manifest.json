@@ -1,0 +1,394 @@
+{
+    "display_information": {
+        "name": "Hermes",
+        "description": "Your Hermes agent on Slack",
+        "background_color": "#1a1a2e"
+    },
+    "features": {
+        "app_home": {
+            "home_tab_enabled": false,
+            "messages_tab_enabled": true,
+            "messages_tab_read_only_enabled": false
+        },
+        "bot_user": {
+            "display_name": "Hermes",
+            "always_online": true
+        },
+        "slash_commands": [
+            {
+                "command": "/hermes",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Talk to Hermes or run a subcommand",
+                "usage_hint": "[subcommand] [args]",
+                "should_escape": false
+            },
+            {
+                "command": "/start",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Acknowledge platform start pings without a reply",
+                "should_escape": false
+            },
+            {
+                "command": "/new",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Start a new session (fresh session ID + history)",
+                "usage_hint": "[name]",
+                "should_escape": false
+            },
+            {
+                "command": "/retry",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Retry the last message (resend to agent)",
+                "should_escape": false
+            },
+            {
+                "command": "/undo",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Remove the last user/assistant exchange",
+                "should_escape": false
+            },
+            {
+                "command": "/title",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Set a title for the current session",
+                "usage_hint": "[name]",
+                "should_escape": false
+            },
+            {
+                "command": "/branch",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Branch the current session (explore a different path)",
+                "usage_hint": "[name]",
+                "should_escape": false
+            },
+            {
+                "command": "/compress",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Manually compress conversation context",
+                "usage_hint": "[focus topic]",
+                "should_escape": false
+            },
+            {
+                "command": "/rollback",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "List or restore filesystem checkpoints",
+                "usage_hint": "[number]",
+                "should_escape": false
+            },
+            {
+                "command": "/stop",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Kill all running background processes",
+                "should_escape": false
+            },
+            {
+                "command": "/approve",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Approve a pending dangerous command",
+                "usage_hint": "[session|always]",
+                "should_escape": false
+            },
+            {
+                "command": "/deny",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Deny a pending dangerous command",
+                "should_escape": false
+            },
+            {
+                "command": "/background",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Run a prompt in the background",
+                "usage_hint": "<prompt>",
+                "should_escape": false
+            },
+            {
+                "command": "/agents",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Show active agents and running tasks",
+                "should_escape": false
+            },
+            {
+                "command": "/queue",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Queue a prompt for the next turn (doesn't interrupt)",
+                "usage_hint": "<prompt>",
+                "should_escape": false
+            },
+            {
+                "command": "/steer",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Inject a message after the next tool call without interrupting",
+                "usage_hint": "<prompt>",
+                "should_escape": false
+            },
+            {
+                "command": "/goal",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Set a standing goal Hermes works on across turns until achieved",
+                "usage_hint": "[text | pause | resume | clear | status]",
+                "should_escape": false
+            },
+            {
+                "command": "/subgoal",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Add or manage extra criteria on the active goal",
+                "usage_hint": "[text | remove N | clear]",
+                "should_escape": false
+            },
+            {
+                "command": "/whoami",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Show your slash command access (admin / user)",
+                "should_escape": false
+            },
+            {
+                "command": "/profile",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Show active profile name and home directory",
+                "should_escape": false
+            },
+            {
+                "command": "/sethome",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Set this chat as the home channel",
+                "should_escape": false
+            },
+            {
+                "command": "/resume",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Resume a previously-named session",
+                "usage_hint": "[name]",
+                "should_escape": false
+            },
+            {
+                "command": "/sessions",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Browse and resume previous sessions",
+                "should_escape": false
+            },
+            {
+                "command": "/model",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Switch model for this session",
+                "usage_hint": "[model] [--provider name] [--global] [--refresh]",
+                "should_escape": false
+            },
+            {
+                "command": "/codex-runtime",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Toggle codex app-server runtime for OpenAI/Codex models",
+                "usage_hint": "[auto|codex_app_server]",
+                "should_escape": false
+            },
+            {
+                "command": "/personality",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Set a predefined personality",
+                "usage_hint": "[name]",
+                "should_escape": false
+            },
+            {
+                "command": "/footer",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Toggle gateway runtime-metadata footer on final replies",
+                "usage_hint": "[on|off|status]",
+                "should_escape": false
+            },
+            {
+                "command": "/yolo",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Toggle YOLO mode (skip all dangerous command approvals)",
+                "should_escape": false
+            },
+            {
+                "command": "/reasoning",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Manage reasoning effort and display",
+                "usage_hint": "[level|show|hide]",
+                "should_escape": false
+            },
+            {
+                "command": "/fast",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Toggle fast mode — OpenAI Priority Processing / Anthropic Fast Mode (Normal/Fast)",
+                "usage_hint": "[normal|fast|status]",
+                "should_escape": false
+            },
+            {
+                "command": "/voice",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Toggle voice mode",
+                "usage_hint": "[on|off|tts|status]",
+                "should_escape": false
+            },
+            {
+                "command": "/bundles",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "List skill bundles (aliases /<name> for multiple skills)",
+                "should_escape": false
+            },
+            {
+                "command": "/curator",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Background skill maintenance (status, run, pin, archive, list-archived)",
+                "usage_hint": "[subcommand]",
+                "should_escape": false
+            },
+            {
+                "command": "/kanban",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Multi-profile collaboration board (tasks, links, comments)",
+                "usage_hint": "[subcommand]",
+                "should_escape": false
+            },
+            {
+                "command": "/reload-mcp",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Reload MCP servers from config",
+                "should_escape": false
+            },
+            {
+                "command": "/reload-skills",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Re-scan ~/.hermes/skills/ for newly installed or removed skills",
+                "should_escape": false
+            },
+            {
+                "command": "/commands",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Browse all commands and skills (paginated)",
+                "usage_hint": "[page]",
+                "should_escape": false
+            },
+            {
+                "command": "/help",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Show available commands",
+                "should_escape": false
+            },
+            {
+                "command": "/restart",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Gracefully restart the gateway after draining active runs",
+                "should_escape": false
+            },
+            {
+                "command": "/usage",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Show token usage and rate limits for the current session",
+                "should_escape": false
+            },
+            {
+                "command": "/insights",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Show usage insights and analytics",
+                "usage_hint": "[days]",
+                "should_escape": false
+            },
+            {
+                "command": "/platform",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Pause, resume, or list a failing gateway platform",
+                "usage_hint": "<pause|resume|list> [name]",
+                "should_escape": false
+            },
+            {
+                "command": "/update",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Update Hermes Agent to the latest version",
+                "should_escape": false
+            },
+            {
+                "command": "/debug",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Upload debug report (system info + logs) and get shareable links",
+                "should_escape": false
+            },
+            {
+                "command": "/reset",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Alias for /new — Start a new session (fresh session ID + history)",
+                "usage_hint": "[name]",
+                "should_escape": false
+            },
+            {
+                "command": "/fork",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Alias for /branch — Branch the current session (explore a different path)",
+                "usage_hint": "[name]",
+                "should_escape": false
+            },
+            {
+                "command": "/bg",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Alias for /background — Run a prompt in the background",
+                "usage_hint": "<prompt>",
+                "should_escape": false
+            },
+            {
+                "command": "/btw",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Alias for /background — Run a prompt in the background",
+                "usage_hint": "<prompt>",
+                "should_escape": false
+            },
+            {
+                "command": "/tasks",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Alias for /agents — Show active agents and running tasks",
+                "should_escape": false
+            },
+            {
+                "command": "/q",
+                "url": "https://hermes-agent.local/slack/commands",
+                "description": "Alias for /queue — Queue a prompt for the next turn (doesn't interrupt)",
+                "usage_hint": "<prompt>",
+                "should_escape": false
+            }
+        ],
+        "assistant_view": {
+            "assistant_description": "Chat with Hermes in threads and DMs.",
+            "suggested_prompts": []
+        }
+    },
+    "oauth_config": {
+        "scopes": {
+            "bot": [
+                "app_mentions:read",
+                "assistant:write",
+                "channels:history",
+                "channels:read",
+                "chat:write",
+                "commands",
+                "files:read",
+                "files:write",
+                "groups:history",
+                "groups:read",
+                "im:history",
+                "im:read",
+                "im:write",
+                "users:read"
+            ]
+        },
+        "pkce_enabled": false
+    },
+    "settings": {
+        "event_subscriptions": {
+            "bot_events": [
+                "app_mention",
+                "assistant_thread_context_changed",
+                "assistant_thread_started",
+                "message.channels",
+                "message.groups",
+                "message.im"
+            ]
+        },
+        "interactivity": {
+            "is_enabled": true
+        },
+        "org_deploy_enabled": true,
+        "socket_mode_enabled": true,
+        "token_rotation_enabled": false,
+        "is_mcp_enabled": false
+    }
+}
