@@ -2,9 +2,11 @@
 // Gateway control-plane file paths
 //
 // Shared between the daemon (gateway.ts) and the control CLI
-// (gateway-control.ts). Resolved from this file's own location so they
-// don't depend on the process cwd. The daemon writes PID + status here;
-// the control commands read them.
+// (gateway-control.ts).
+//
+// .gateway/ is created under process.cwd() — run slack-gateway from the
+// directory you want logs/pid/status to live in. BIN_FILE still resolves
+// from the package install location (it never moves).
 // ============================================================
 
 import { dirname, resolve } from "node:path";
@@ -14,15 +16,16 @@ import { mkdirSync } from "node:fs";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(__dirname, "..");
 
-/** Control-plane directory (gitignored). */
-export const GATEWAY_DIR = resolve(projectRoot, ".gateway");
+/** Control-plane directory (gitignored). Created under cwd. */
+export const GATEWAY_DIR = resolve(process.cwd(), ".gateway");
 /** PID of the running daemon. */
 export const PID_FILE = resolve(GATEWAY_DIR, "gateway.pid");
 /** Daemon stdout/stderr when started in the background. */
 export const LOG_FILE = resolve(GATEWAY_DIR, "gateway.log");
 /** Periodic runtime snapshot the daemon writes for status/list. */
 export const STATUS_FILE = resolve(GATEWAY_DIR, "status.json");
-/** Absolute path to the bin dispatcher (for detached spawn). */
+/** Absolute path to the bin dispatcher (for detached spawn, always relative to
+ *  the package root regardless of cwd). */
 export const BIN_FILE = resolve(projectRoot, "bin", "slack-gateway.mjs");
 
 /** Ensure the control-plane directory exists. */
