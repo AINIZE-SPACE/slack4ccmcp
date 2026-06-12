@@ -24,21 +24,31 @@
 
 ## 里程碑
 
+### M0：验证 Spike（评审新增）
+- 真实运行 `codex exec <prompt> --json --ask-for-approval never`
+- 固化 JSONL fixture（确认 `thread_id` 字段格式）
+- 固化 resume fixture：`codex exec resume <tid> <prompt> --json`
+- 固化 MCP tool-call fixture（含 tool_use 事件格式）
+- 产物：`tests/fixtures/codex-*.jsonl`
+- 详见 [#29](https://github.com/AINIZE-SPACE/slack4ccmcp/issues/29)
+
 ### M1：双 Agent 核心（STORY-1, 2, 5）
+- Per-profile Slack runtime 重构（拆单例）
 - Provider 抽象层完成
 - Claude Code provider（现有逻辑迁移）
-- Codex provider（`codex exec` spawn）
-- 统一 Session 模型，解析 codex thread ID
+- Codex provider（`codex exec` spawn，`thread_id` 解析）
+- Session key 结构化改造（profileId + providerId + scopeKey + projectDir）
 
 ### M2：多 Slack App（STORY-3, 6）
 - 多 SocketModeClient 实例
-- `SLACK_APP_TOKEN_CC` / `SLACK_APP_TOKEN_CODEX` 多 token
+- `GATEWAY_PROFILES=cc,codex` 配置系统
+- Per-profile token 注入 MCP config
 - 每个 Slack app → 对应 provider
 
 ### M3：多项目 + Slack 工具（STORY-4, 7）
 - 会话级 project cwd
 - `/cc_new --project <dir>` 切换工作目录
-- Codex 能用的 Slack MCP tools
+- Codex Slack MCP Tools（gateway-only，MCP server 保持 CC first）
 
 ---
 

@@ -1,12 +1,32 @@
 # STORY-7: Codex Slack MCP Tools
 
 > 状态：规划中 | Epic: [v3 EPIC](./v3-epic.md) | 优先级：P1 | 依赖：STORY-2
+> 评审决策：详见 [#28](https://github.com/AINIZE-SPACE/slack4ccmcp/issues/28)、[#31](https://github.com/AINIZE-SPACE/slack4ccmcp/issues/31)
+> Phase 1: gateway-only Codex；MCP server 保持 Claude Code first。
 
 ## 问题
 
 Codex 需要通过 MCP 获得 Slack 工具（读频道历史、发消息等），和 CC 一样。但 MCP 配置格式和启动方式不同。
 
 ## 方案
+
+### Per-Profile Token 注入（P0 修复）
+
+当前 CC sender MCP config 读全局 `process.env.SLACK_BOT_TOKEN` / `SLACK_APP_TOKEN`。多 profile 后，每个 provider 必须注入**对应 profile 的 token**，不能继续用全局 env。
+
+```typescript
+// 旧（全局 env） — 多 profile 后不工作
+const SENDER_MCP_CONFIG = {
+  env: { SLACK_BOT_TOKEN: process.env.SLACK_BOT_TOKEN }  // 永远是 CC 的 token
+};
+
+// 新（per-profile）— 每个 provider 注入自己的 token
+function generateMCPConfig(profile: SlackProfile, provider: AgentProvider): string {
+  return provider.id === "codex"
+    ? generateTOMLConfig(profile)   // TOML + profile 的 token
+    : generateJSONConfig(profile);  // JSON + profile 的 token
+}
+```
 
 ### MCP Config 生成
 

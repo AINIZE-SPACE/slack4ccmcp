@@ -1,6 +1,42 @@
 # STORY-4: 会话级多项目支持
 
 > 状态：规划中 | Epic: [v3 EPIC](./v3-epic.md) | 优先级：P1 | 依赖：STORY-1
+> 评审决策：详见 [#25](https://github.com/AINIZE-SPACE/slack4ccmcp/issues/25)
+> 关联：此 story 与 STORY-5 共同定义新 session key 结构
+
+## 前置：Session Key 结构化改造（P0，必须先做）
+
+当前 session key 是扁平字符串（如 `channel:C01`），无法区分同频道下不同 provider 或不同项目。
+
+### 旧 key（不兼容多 provider/多项目）
+```
+channel:C0B8V9LV8CT          ← 一个频道只有一个 session
+```
+
+### 新 key（复合维度）
+```
+cc:claude:channel:C0B8V9LV8CT:E:\\project-a
+│  │      │       │            │
+│  │      │       │            └─ projectDir（可选）
+│  │      │       └─ scopeKey（channel:<id> 或 <channel>:<thread_ts>）
+│  │      └─ providerId（"claude" | "codex"）
+│  └─ profileId（"cc" | "codex"）
+```
+
+### 影响面
+
+| 组件 | 当前 | 改造后 |
+|------|------|--------|
+| `sessionStore.getOrCreate(key)` | key = 字符串 | key = `SessionIdentity` 对象 |
+| `threadChains` Map | `Map<string, Promise>` | `Map<string, Promise>`（序列化后的 key） |
+| `detectCommand/resume` | 按 scopeKey 查找 | 按 provider + scope 查找 |
+| `memory/sessions.md` | 4 列 | 6 列（profile, provider, scope, project, uuid, ...） |
+
+### 变更文件
+- `session-store.ts`：key 从字符串改为 `SessionIdentity`
+- `gateway.ts`：`scopeKey()` → `sessionIdentity()`，`threadChains` key 同步
+- `session-commands.ts`：`/cc_resume` 按 provider + scope 匹配
+- `memory/sessions.md`：表头新增 Profile、Provider、Project 列
 
 ## 问题
 

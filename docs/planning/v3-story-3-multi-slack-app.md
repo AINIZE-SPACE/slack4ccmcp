@@ -1,12 +1,51 @@
 # STORY-3: 多 Slack App Socket Mode
 
 > 状态：规划中 | Epic: [v3 EPIC](./v3-epic.md) | 优先级：P0 | 依赖：STORY-1
+> 评审决策：详见 [#24](https://github.com/AINIZE-SPACE/slack4ccmcp/issues/24)、[#30](https://github.com/AINIZE-SPACE/slack4ccmcp/issues/30)
 
 ## 问题
 
-当前 `socket-manager.ts` 只有一个 `SocketModeClient`，用一个 `SLACK_APP_TOKEN`。要同时监听 CC 和 Codex 两个 Slack app，需要多个连接。
+当前代码是单例结构——Slack runtime 的全部核心组件都是模块级单例。要同时监听 CC 和 Codex 两个 Slack app，必须先拆单例。
+
+### 当前单例清单（需全部改成 per-profile）
+
+| 文件 | 单例 | 行 |
+|------|------|-----|
+| `slack-clients.ts` | `let webClient: WebClient \| null` | [#7](https://github.com/AINIZE-SPACE/slack4ccmcp/blob/dev/src/slack-clients.ts#L7) |
+| `slack-clients.ts` | `let appToken: string \| null` | 全局 |
+| `socket-manager.ts` | `let socketClient: SocketModeClient \| null` | [#23](https://github.com/AINIZE-SPACE/slack4ccmcp/blob/dev/src/socket-manager.ts#L23) |
+| `socket-manager.ts` | `let botUserId: string \| null` | [#28](https://github.com/AINIZE-SPACE/slack4ccmcp/blob/dev/src/socket-manager.ts#L28) |
+| `socket-manager.ts` | `let onEventCallback: EventCallback \| null` | [#24](https://github.com/AINIZE-SPACE/slack4ccmcp/blob/dev/src/socket-manager.ts#L24) |
+| `socket-manager.ts` | `let onSlashCallback: SlashCallback \| null` | [#25](https://github.com/AINIZE-SPACE/slack4ccmcp/blob/dev/src/socket-manager.ts#L25) |
 
 ## 方案
+
+### 重构：per-profile 实例
+
+STORY-3 **不只是** `startAll(profiles)`。必须先重构为 per-profile 实例：
+
+```typescript
+// 每个 profile 拥有完整的独立 Slack runtime
+interface SlackProfile {
+  id: string;                        // "cc" | "codex"
+  appToken: string;
+  botToken: string;
+  providerId: string;                // "claude" | "codex"
+  webClient: WebClient;              // 独立实例
+  socketClient: SocketModeClient;    // 独立实例
+  botUserId: string | null;          // 独立 bot 身份
+}
+
+// SocketManager 从单例变为多 profile 管理器
+class SocketManager {
+  private profiles = new Map<string, SlackProfile>();
+
+  async addProfile(config: ProfileConfig): Promise<void>;
+  async removeProfile(id: string): Promise<void>;
+  async startAll(): Promise<void>;
+  async stopAll(): Promise<void>;
+}
+```
 
 ### 多实例架构
 
