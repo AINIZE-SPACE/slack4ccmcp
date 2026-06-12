@@ -110,7 +110,7 @@ Invite the bot to a channel (`/invite @ClaudeCodeApp`), then @mention it or send
 
 ## MCP Server Mode
 
-Create `.claude/mcp.json` in your project root (reuses the `.claude` system — no need for a separate root `mcp.json`):
+Create `.claude/mcp.json` in your project root (reuses the `.claude` system — no need for a separate root `mcp.json`). You can start from `.claude/mcp.json.example`:
 
 **Standalone (no gateway)**:
 

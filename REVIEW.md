@@ -22,7 +22,7 @@ pass. This pass resolved the remaining five:
 
 - #16 automated test coverage
 - #17 structured MCP tool error handling
-- #19 empty root `.mcp.json`
+- #19 duplicate root `.mcp.json`
 - #20 module-load `process.cwd()` path capture
 - #21 Slack channel pagination
 
@@ -110,13 +110,14 @@ handler on failure.
 
 The underscore convention is appropriate for a required callback parameter.
 
-### LOW-003: Empty root `.mcp.json`
+### LOW-003: Duplicate root `.mcp.json`
 
 **Status:** Fixed  
 **GitHub:** #19 closed
 
-Root `.mcp.json` now contains the same usable `slack-socket` command shape as
-the example file.
+The duplicate root `.mcp.json` and `.mcp.json.example` were removed. The
+canonical project MCP config is `.claude/mcp.json`, with an example at
+`.claude/mcp.json.example`.
 
 ### LOW-004: Module-level cwd() side effect in gateway-paths.ts
 
@@ -141,7 +142,8 @@ optional `cursor`, and returns `next_cursor` when more channels remain.
 
 | File | Change |
 | --- | --- |
-| `.mcp.json` | Added usable `slack-socket` MCP config |
+| `.mcp.json` / `.mcp.json.example` | Removed duplicate root MCP configs |
+| `.claude/mcp.json.example` | Added canonical project MCP example |
 | `package.json` | Added `npm test` |
 | `src/tool-errors.ts` | New structured tool error helpers |
 | `src/index.ts` | Structured MCP tool error serialization |

@@ -110,7 +110,7 @@ slack-gateway list     # 列出 channel→session 映射
 
 ## MCP Server 模式
 
-在项目根创建 `.claude/mcp.json`（复用 `.claude` 体系，无需在根目录额外建 `mcp.json`）：
+在项目根创建 `.claude/mcp.json`（复用 `.claude` 体系，无需在根目录额外建 `mcp.json`）。可从 `.claude/mcp.json.example` 复制：
 
 **单独使用（不跑 gateway）**：
 

@@ -25,7 +25,7 @@ closed as by-design.
 | #16 | Medium | No automated test coverage | Added `npm test` and focused store tests |
 | #17 | Medium | Inconsistent MCP tool error handling | Added structured `ToolError` handling |
 | #18 | Low | `.env.example` incomplete | Expanded env documentation |
-| #19 | Low | Empty root `.mcp.json` | Populated usable MCP config |
+| #19 | Low | Duplicate root `.mcp.json` | Removed duplicate root config; canonical config is `.claude/mcp.json` |
 | #20 | Low | Module-level cwd() path side effect | Added lazy gateway path helpers |
 | #21 | Low | `list-channels` lacks pagination | Added cursor and auto-pagination support |
 

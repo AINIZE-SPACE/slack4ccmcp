@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "slack-socket": {
-      "command": "cmd",
-      "args": ["/c", "slack-socket-mcp"]
-    }
-  }
-}

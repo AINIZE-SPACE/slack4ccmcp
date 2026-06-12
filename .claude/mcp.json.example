@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "slack-socket": {
+      "command": "cmd",
+      "args": ["/c", "slack-socket-mcp"],
+      "env": {
+        "SLACK_BOT_TOKEN": "${SLACK_BOT_TOKEN}",
+        "SLACK_APP_TOKEN": "${SLACK_APP_TOKEN}"
+      }
+    }
+  }
+}
