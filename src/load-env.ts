@@ -25,14 +25,16 @@ const projectRoot = resolve(__dirname, "..");
 export const GLOBAL_ENV_PATH = resolve(homedir(), ".gateway", ".env");
 /** Path to the project-installed .env (always found at package root). */
 export const PROJECT_ENV_PATH = resolve(projectRoot, ".env");
-/** Path to the local .env in the current working directory (runtime override). */
-export const CWD_ENV_PATH = resolve(process.cwd(), ".env");
+/** Path to the local .env in the current working directory's .gateway/ folder.
+ *  Using .gateway/.env instead of ./.env avoids conflicts with other apps
+ *  that may also look for a root-level .env. */
+export const CWD_ENV_PATH = resolve(process.cwd(), ".gateway", ".env");
 
 /**
  * Load .env from three tiers:
- *   1. ~/.gateway/.env      — global defaults (lowest)
- *   2. <project-root>/.env  — project-installed
- *   3. ./.env (cwd)         — working-directory overrides (highest file priority)
+ *   1. ~/.gateway/.env            — global defaults (lowest)
+ *   2. <project-root>/.env        — project-installed
+ *   3. ./.gateway/.env (cwd)      — working-directory overrides (highest file)
  *
  * Shell environment always wins over all files.
  *
