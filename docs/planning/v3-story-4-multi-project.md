@@ -73,7 +73,7 @@ Codex 从项目目录读取 `AGENTS.md`（类似 Claude 的 `CLAUDE.md`）。不
 
 ```bash
 # Codex 在指定 cwd 运行
-codex exec <prompt> --json --dangerously-bypass-approvals-and-sandbox   # cwd 就是 projectDir
+codex exec <prompt> --json   # cwd 就是 projectDir
 ```
 
 ### 环境变量

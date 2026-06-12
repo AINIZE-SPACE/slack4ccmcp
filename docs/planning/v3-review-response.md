@@ -13,7 +13,7 @@
 | 项 | 旧 | 新 |
 |----|-----|-----|
 | Session ID 字段 | `thread.id` | `thread_id`（UUID 格式，M0 实测） + `thread.id`（兼容） |
-| 权限标志 | `--full-auto`（deprecated）| `--dangerously-bypass-approvals-and-sandbox`（M0 实测可用） |
+| 权限标志 | `--full-auto` / `--ask-for-approval never` | M0 实测：当前 `codex exec` 不支持 `--ask-for-approval`，Phase 1 不传审批 flag |
 | 文档 | v3-story-2-codex-provider.md | 已修复 |
 | 跟踪 | [#23](https://github.com/AINIZE-SPACE/slack4ccmcp/issues/23) | 已加评论 |
 | 决策单 | — | [#29](https://github.com/AINIZE-SPACE/slack4ccmcp/issues/29) |
@@ -60,13 +60,13 @@
 
 | 文档 | v3-epic.md | 已更新 |
 |------|------------|--------|
-| 内容 | 真实 codex exec --json 固化 JSONL/resume/MCP fixture | |
+| 内容 | 真实 codex exec --json 固化 JSONL/resume/MCP fixture；以本机 CLI 输出为准 | |
 
 ## 新增 GitHub Issues
 
 | Issue | 标题 | 类型 |
 |-------|------|------|
-| [#29](https://github.com/AINIZE-SPACE/slack4ccmcp/issues/29) | Codex gateway runtime uses --ask-for-approval never and documented JSONL | 决策单 |
+| [#29](https://github.com/AINIZE-SPACE/slack4ccmcp/issues/29) | Codex gateway runtime uses实测 `codex exec --json` JSONL 契约 | 决策单 |
 | [#30](https://github.com/AINIZE-SPACE/slack4ccmcp/issues/30) | Use cc/codex Slack profiles with independent Socket Mode tokens | 决策单 |
 | [#31](https://github.com/AINIZE-SPACE/slack4ccmcp/issues/31) | Phase 1 Codex is gateway-only; keep MCP server Claude Code first | 决策单 |
 

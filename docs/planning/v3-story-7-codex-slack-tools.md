@@ -56,7 +56,7 @@ default_tools_approval_mode = "approve"
 Codex 支持通过 `--mcp-config` 或 `config.toml` 加载 MCP servers。gateway spawn 时：
 
 ```bash
-codex exec <prompt> --json --dangerously-bypass-approvals-and-sandbox --mcp-config config/codex-mcp.generated.toml
+codex exec <prompt> --json --mcp-config config/codex-mcp.generated.toml
 ```
 
 或者在项目目录的 `config.toml` 里引用：
