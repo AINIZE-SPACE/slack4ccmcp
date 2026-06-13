@@ -73,7 +73,7 @@ export interface AgentProvider {
   /** 列出本机已有 session（用于 /sessions 等命令，暂未实现） */
   listSessions?(projectDir?: string): Promise<AgentSessionInfo[]>;
 
-  /** 生成 sender-only MCP config 文件，返回文件路径 */
+  /** 生成 MCP config 文件，返回文件路径 */
   generateMCPConfig?(): string;
 }
 

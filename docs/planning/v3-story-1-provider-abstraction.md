@@ -34,7 +34,7 @@ interface AgentProvider {
   /** 列出本机已有的 session */
   listSessions(projectDir?: string): Promise<AgentSessionInfo[]>;
 
-  /** 生成 sender-only MCP config 文件，返回文件路径 */
+  /** 生成 MCP config 文件，返回文件路径 */
   generateMCPConfig(): string;
 }
 

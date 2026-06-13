@@ -21,6 +21,9 @@
 //   - system.permission_request → 审批回调 → stdin 回写
 //   - --replay-user-messages 回显用户消息（isReplay:true 忽略）
 //
+// MCP: `claude -p` 继承父进程环境，直接加载 `.claude/mcp.json`。
+// ChorusGate MCP 固定为 Web API 工具集，不承担 Socket Mode 收事件。
+//
 // 跟踪: [#34](https://github.com/AINIZE-SPACE/chorusgate/issues/34)
 // ============================================================
 

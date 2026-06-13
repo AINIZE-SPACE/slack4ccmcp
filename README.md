@@ -112,15 +112,13 @@ Invite the bot to a channel (`/invite @ChorusGate`), then @mention it or send it
 
 > **Only one Socket Mode connection at a time.** Slack load-balances each event to exactly one open connection per app — two connections means events get split and lost.
 >
-> To run the gateway for receiving AND keep an agent runtime able to proactively send messages, add `"MCP_SENDER_ONLY": "1"` to the MCP server config. It skips Socket Mode and uses Web API only.
+> ChorusGate MCP is now Web API only. The gateway owns Socket Mode; agent runtimes can reuse the same `.claude/mcp.json` for channel reads and writes.
 
 ---
 
 ## MCP Server Mode
 
 Create `.claude/mcp.json` in your project root (reuses the `.claude` system — no need for a separate root `mcp.json`). You can start from `.claude/mcp.json.example`:
-
-**Standalone (no gateway)**:
 
 ```json
 {
@@ -133,21 +131,9 @@ Create `.claude/mcp.json` in your project root (reuses the `.claude` system — 
 }
 ```
 
-**Alongside gateway** (must add `MCP_SENDER_ONLY=1`):
+The same config works both standalone and alongside the gateway because `chorusgate-mcp` no longer opens Socket Mode.
 
-```json
-{
-  "mcpServers": {
-    "chorusgate": {
-      "command": "chorusgate-mcp",
-      "args": [],
-      "env": { "MCP_SENDER_ONLY": "1" }
-    }
-  }
-}
-```
-
-Available MCP tools: `slack_check_events` / `slack_reply` / `slack_send_message` / `slack_add_reaction` / `slack_channel_history` / `slack_thread_replies` / `slack_list_channels` / `slack_get_user_info`
+Available MCP tools: `slack_reply` / `slack_send_message` / `slack_add_reaction` / `slack_channel_history` / `slack_thread_replies` / `slack_list_channels` / `slack_get_user_info`
 
 ---
 
@@ -191,15 +177,13 @@ Control sessions directly from Slack:
 | `GATEWAY_CLAUDE_CWD` | project root | Working directory for spawned claude processes |
 | `CLAUDE_BIN` | `claude` | Path to the Claude CLI binary |
 | `CLAUDE_PERMISSION_MODE` | `bypassPermissions` | Permission mode for headless claude |
-| `MCP_SENDER_ONLY` | — | Set to `1` to use Web API tools only, no Socket Mode connection |
-
 ---
 
 ## Troubleshooting
 
 **Bot randomly misses messages**
 
-Only one Socket Mode connection per app is allowed. Multiple connections split events. Make sure only the gateway opens a Socket Mode connection; add `MCP_SENDER_ONLY=1` to the MCP server config.
+Only one Socket Mode connection per app is allowed. Multiple connections split events. Make sure only the gateway opens a Socket Mode connection; `chorusgate-mcp` no longer opens one.
 
 **Slash commands don't work in DMs**
 

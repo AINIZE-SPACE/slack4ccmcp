@@ -104,7 +104,7 @@ class CodexEventParser implements EventParser {
 
 ## MCP 配置格式
 
-Phase 1 Codex 是 gateway-only；Codex Slack MCP tools 不阻塞 provider/session 路径。后续如果启用 Codex MCP tools，使用 TOML 格式 `config.toml`，并保持 `MCP_SENDER_ONLY=1`，避免 MCP server 打开第二条 Socket Mode receiving connection。
+Phase 1 Codex 是 gateway-only；Codex Slack MCP tools 不阻塞 provider/session 路径。后续如果启用 Codex MCP tools，使用 TOML 格式 `config.toml`，直接复用只含 Web API 工具的 `chorusgate-mcp`。
 
 ```toml
 [mcp_servers.slack]
@@ -113,7 +113,6 @@ args = ["E:\\path\\to\\chorusgate-mcp.mjs"]
 default_tools_approval_mode = "approve"
 
 [mcp_servers.slack.env]
-MCP_SENDER_ONLY = "1"
 SLACK_BOT_TOKEN = "xoxb-..."
 SLACK_APP_TOKEN = "xapp-..."
 ```

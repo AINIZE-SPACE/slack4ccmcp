@@ -10,7 +10,7 @@
 **现象**：gateway 运行正常，但大量事件收不到，随机漏。  
 **原因**：Slack 把每个事件投递到同一 app 的**任意一个** Socket Mode 连接。多个连接 = 事件分流。常见场景：遗留的测试进程没杀、Claude Code MCP server 和 gateway 同时连。  
 **诊断**：Socket Mode `hello` 帧里的 `num_connections` 字段，正常应为 1。  
-**修复**：`chorusgate start` 单实例保证；MCP server 共存时设 `MCP_SENDER_ONLY=1`。
+**修复**：`chorusgate start` 单实例保证；`chorusgate-mcp` 已固定不再建立 Socket Mode，保留 gateway 作为唯一收事件进程。
 
 ### 2. reaction_added 事件的 channel 位置错误
 **现象**：`reaction_added` 事件收到了，但 channel 字段为空。  
@@ -57,7 +57,7 @@
 ### 8. --mcp-config 内联 JSON 被吃掉
 **现象**：claude 报 "MCP config file not found {mcpServers:{}}"。  
 **原因**：Windows cmd.exe 把内联 JSON 字符串里的引号吃掉，claude 解析失败。  
-**修复**：写临时文件 `config/sender-mcp.generated.json`，传文件路径给 `--mcp-config`。
+**修复**：不要在命令行里内联复杂 JSON；如果某个 runtime 仍要求 `--mcp-config` 传文件路径，就写临时文件再传路径。
 
 ### 9. Windows exit code 3221225794（0xC0000142）
 **现象**：大量 `claude -p exited 3221225794` 错误。  
@@ -81,7 +81,7 @@
 ### 12. 子进程 claude 开了第二个 Socket Mode 连接
 **现象**：gateway 偶发漏事件，`num_connections` 变成 2。  
 **原因**：gateway spawn 的 `claude -p` 加载了项目 `.claude/mcp.json`，其中的 `chorusgate-mcp` 又建了一个 Socket Mode 连接。  
-**修复**：`--strict-mcp-config` + 只传 sender-only MCP config（`MCP_SENDER_ONLY=1`），阻止加载项目 `.claude/mcp.json`。
+**修复**：现在 `.claude/mcp.json` 本身就不应再启动 Socket Mode；如果仍出现第二条连接，优先排查是否有旧版本 `chorusgate-mcp` 进程残留或其他测试进程在直连 Slack。
 
 ---
 

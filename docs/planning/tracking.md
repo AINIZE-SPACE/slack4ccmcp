@@ -22,6 +22,7 @@ This file maps the next-version planning docs to GitHub issues.
 | Install/uninstall lifecycle | `docs/feature-install-lifecycle.md` | #9 |
 | Durable event state and retry | `docs/roadmap.md` | #1 |
 | Claude Code session host | `docs/roadmap.md` | #2 |
+| MCP Web API-only contract | `docs/planning/v3-story-9-mcp-webapi-only.md` | #40 |
 
 ## Runtime Priority Summary
 

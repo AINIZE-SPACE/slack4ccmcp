@@ -86,8 +86,8 @@ Then, in Slack: invite the bot to a channel (`/invite @ChorusGate`),
 - **One Socket Mode connection only.** Slack load-balances each event to exactly
   ONE open connection. Don't run the gateway AND a Claude Code MCP server that
   connects Socket Mode at the same time — events scatter and get lost. To let
-  Claude Code still *send* proactively while the gateway owns receiving, run the
-  MCP server with `MCP_SENDER_ONLY=1` (see README).
+  Claude Code still *send* proactively while the gateway owns receiving, use
+  the current `chorusgate-mcp`, which stays on Slack Web API tools only.
 - **`reaction_added` needs both the event subscription AND the `reactions:read`
   scope.** The manifest includes both. If you edit scopes/events later, you must
   **reinstall** the app.

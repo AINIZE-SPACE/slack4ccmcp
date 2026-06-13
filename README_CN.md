@@ -108,15 +108,13 @@ chorusgate list     # 列出 channel→session 映射
 
 > **不能同时建两个 Socket Mode 连接。** Slack 把事件负载均衡到同一 app 的所有连接，两个连接 = 事件分流丢失。
 >
-> 如果需要 Gateway 收事件 + agent runtime 也能发消息，在 `.claude/mcp.json` 里给 MCP server 加 `"MCP_SENDER_ONLY": "1"`，它就只用 Web API，不建 WebSocket 连接。
+> 现在 `chorusgate-mcp` 固定只提供 Web API 工具，不再建立 Socket Mode。Gateway 负责收事件，agent runtime 可直接复用同一份 `.claude/mcp.json`。
 
 ---
 
 ## MCP Server 模式
 
 在项目根创建 `.claude/mcp.json`（复用 `.claude` 体系，无需在根目录额外建 `mcp.json`）。可从 `.claude/mcp.json.example` 复制：
-
-**单独使用（不跑 gateway）**：
 
 ```json
 {
@@ -129,21 +127,9 @@ chorusgate list     # 列出 channel→session 映射
 }
 ```
 
-**与 gateway 共存**（必须加 `MCP_SENDER_ONLY=1`）：
+同一份配置既可单独使用，也可与 gateway 共存，因为 `chorusgate-mcp` 已不再建立 Socket Mode。
 
-```json
-{
-  "mcpServers": {
-    "chorusgate": {
-      "command": "chorusgate-mcp",
-      "args": [],
-      "env": { "MCP_SENDER_ONLY": "1" }
-    }
-  }
-}
-```
-
-可用的 MCP tools：`slack_check_events` / `slack_reply` / `slack_send_message` / `slack_add_reaction` / `slack_channel_history` / `slack_thread_replies` / `slack_list_channels` / `slack_get_user_info`
+可用的 MCP tools：`slack_reply` / `slack_send_message` / `slack_add_reaction` / `slack_channel_history` / `slack_thread_replies` / `slack_list_channels` / `slack_get_user_info`
 
 ---
 
@@ -180,15 +166,13 @@ chorusgate list     # 列出 channel→session 映射
 | `GATEWAY_CLAUDE_CWD` | 项目根 | spawned claude 的工作目录 |
 | `CLAUDE_BIN` | `claude` | claude CLI 路径 |
 | `CLAUDE_PERMISSION_MODE` | `bypassPermissions` | headless 模式权限策略 |
-| `MCP_SENDER_ONLY` | — | 设为 `1` 只保留 Web API 工具，不建 Socket Mode 连接 |
-
 ---
 
 ## 常见问题
 
 **事件丢失，机器人时而收不到消息**
 
-同一 Slack app 只能有一个 Socket Mode 连接。多个连接导致 Slack 分流事件。确保只有 gateway 建 Socket Mode 连接；MCP server 加 `MCP_SENDER_ONLY=1`。
+同一 Slack app 只能有一个 Socket Mode 连接。多个连接会导致 Slack 分流事件。确保只有 gateway 建 Socket Mode 连接；`chorusgate-mcp` 已不再建第二条连接。
 
 **Slash command 在 DM 里不工作**
 
