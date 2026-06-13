@@ -7,6 +7,14 @@
         "SLACK_BOT_TOKEN": "${SLACK_BOT_TOKEN}",
         "SLACK_APP_TOKEN": "${SLACK_APP_TOKEN}"
       }
+    },
+    "trello": {
+      "command": "npx",
+      "args": ["-y", "trello-mcp-server"],
+      "env": {
+        "TRELLO_API_KEY": "${TRELLO_API_KEY}",
+        "TRELLO_TOKEN": "${TRELLO_TOKEN}"
+      }
     }
   }
 }
