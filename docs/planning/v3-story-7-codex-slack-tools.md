@@ -41,7 +41,6 @@ command = "node"
 args = ["E:\\my_project\\chorusgate\\bin\\chorusgate-mcp.mjs"]
 
 [mcp_servers.slack.env]
-MCP_SENDER_ONLY = "1"
 SLACK_BOT_TOKEN = "xoxb-..."
 SLACK_APP_TOKEN = "xapp-..."
 
@@ -84,7 +83,7 @@ function toolLabel(name: string): string {
 - CC 用 `config/sender-mcp.generated.json`（JSON 格式）
 - Codex 用 `config/codex-mcp.generated.toml`（TOML 格式）
 - 两个文件各自生成，互不干扰
-- 都用 `MCP_SENDER_ONLY=1` 的同一份 `chorusgate-mcp.mjs`
+- 都用同一份只含 Web API 工具的 `chorusgate-mcp.mjs`
 
 ## 验收标准
 

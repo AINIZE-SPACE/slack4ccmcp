@@ -15,7 +15,7 @@ coding agent runtimes such as Claude Code and Codex.
 | [feature-session-management.md](./feature-session-management.md) | Session 管理：slash command、sessions.md 存储、为什么不读 jsonl |
 | [feature-live-progress.md](./feature-live-progress.md) | 实时进度提示：占位消息、心跳、stream-json 解析、工具标签 |
 | [feature-gateway-lifecycle.md](./feature-gateway-lifecycle.md) | Gateway 生命周期：start/stop/restart/status/list、控制文件、idle eviction |
-| [feature-mcp-server.md](./feature-mcp-server.md) | MCP server 模式：tools、sender-only、配置方式 |
+| [feature-mcp-server.md](./feature-mcp-server.md) | MCP server 模式：Web API tools、配置方式 |
 | [gotchas.md](./gotchas.md) | 调试踩坑记录：13 个实测故障及修复方案 |
 | [roadmap.md](./roadmap.md) | 版本规划方向 + 永久否决方案 |
 

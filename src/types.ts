@@ -1,5 +1,5 @@
 // ============================================================
-// Slack Socket Mode MCP Server — Shared Types
+// ChorusGate Shared Types
 // ============================================================
 
 // --- Slack Event Types ---
@@ -48,29 +48,13 @@ export interface StoredEvent {
   handled: boolean;
   /** When we received this event (epoch ms) */
   received_at: number;
+  /** Which profile (Slack app) this event came from.  Set by SocketManager. */
+  profileId?: string;
   /** Raw Slack event payload for debugging */
   raw?: unknown;
 }
 
 // --- MCP Tool Input/Output Schemas ---
-
-// slack_check_events
-export interface CheckEventsInput {
-  /** If true, only return unhandled events (default: true) */
-  pending_only?: boolean;
-  /** Max events to return (default: 20, max: 100) */
-  limit?: number;
-  /** Filter by event type */
-  type?: SlackEventType;
-  /** Filter by channel ID */
-  channel?: string;
-}
-
-export interface CheckEventsOutput {
-  events: StoredEvent[];
-  total_pending: number;
-  total_stored: number;
-}
 
 // slack_reply
 export interface ReplyInput {

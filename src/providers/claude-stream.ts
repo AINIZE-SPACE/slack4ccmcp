@@ -21,13 +21,13 @@
 //   - system.permission_request → 审批回调 → stdin 回写
 //   - --replay-user-messages 回显用户消息（isReplay:true 忽略）
 //
+// MCP: `claude -p` 继承父进程环境，直接加载 `.claude/mcp.json`。
+// ChorusGate MCP 固定为 Web API 工具集，不承担 Socket Mode 收事件。
+//
 // 跟踪: [#34](https://github.com/AINIZE-SPACE/chorusgate/issues/34)
 // ============================================================
 
-import { spawn, type ChildProcess } from "node:child_process";
-import { writeFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { spawn, type ChildProcess, type SpawnOptions } from "node:child_process";
 import { ClaudeStreamParser } from "./claude-stream-parser.js";
 import type {
   AgentProvider,
@@ -36,45 +36,15 @@ import type {
   SessionOutput,
 } from "./types.js";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const projectRoot = resolve(__dirname, "..", "..");
-
 const CLAUDE_BIN = process.env.CLAUDE_BIN || "claude";
 
-// ---- MCP config (same as claude.ts) ------------------------------------------
+// ---- env helper (per-profile token injection, STORY-7) -----------------------
 
-let _senderMcpConfig: string | null = null;
-function getSenderMCPConfig(): string {
-  if (_senderMcpConfig !== null) return _senderMcpConfig;
-  const senderMcpConfig = resolve(
-    projectRoot, "config", "sender-mcp.generated.json",
-  );
-  const senderBin = resolve(projectRoot, "bin", "chorusgate-mcp.mjs");
-  try {
-    writeFileSync(
-      senderMcpConfig,
-      JSON.stringify({
-        mcpServers: {
-          slack: {
-            command: "node",
-            args: [senderBin],
-            env: {
-              MCP_SENDER_ONLY: "1",
-              SLACK_BOT_TOKEN: process.env.SLACK_BOT_TOKEN || "",
-              SLACK_APP_TOKEN: process.env.SLACK_APP_TOKEN || "",
-            },
-          },
-        },
-      }, null, 2),
-    );
-  } catch (err) {
-    console.error(
-      "[claude-stream] WARNING: could not write sender MCP config:",
-      (err as Error).message,
-    );
-  }
-  _senderMcpConfig = senderMcpConfig;
-  return senderMcpConfig;
+function buildSpawnEnv(opts: CreateSessionOptions): Record<string, string | undefined> {
+  const env: Record<string, string | undefined> = { ...process.env };
+  if (opts.botToken) env.SLACK_BOT_TOKEN = opts.botToken;
+  if (opts.appToken) env.SLACK_APP_TOKEN = opts.appToken;
+  return env;
 }
 
 // ---- spawn helper ------------------------------------------------------------
@@ -90,6 +60,7 @@ function spawnStream(
   args: string[],
   cwd: string,
   parser: ClaudeStreamParser,
+  env?: Record<string, string | undefined>,
 ): StreamSpawnResult {
   const win = process.platform === "win32";
   const cmd = win
@@ -98,12 +69,14 @@ function spawnStream(
         .join(" ")}`
     : CLAUDE_BIN;
   const spawnArgs = win ? [] : args;
-  const child = spawn(cmd, spawnArgs, {
+  const opts: SpawnOptions = {
     cwd,
     stdio: ["pipe", "pipe", "pipe"],
     shell: win,
     windowsHide: true,
-  });
+  };
+  if (env) opts.env = env;
+  const child = spawn(cmd, spawnArgs, opts);
 
   const result: StreamSpawnResult = {
     child,
@@ -112,14 +85,14 @@ function spawnStream(
     settled: false,
   };
 
-  child.stdout.on("data", (chunk) => {
+  child.stdout!.on("data", (chunk) => {
     result.stdoutBuf += chunk.toString();
     const lines = result.stdoutBuf.split("\n");
     result.stdoutBuf = lines.pop() ?? "";
     for (const line of lines) parser.feed(line);
   });
 
-  child.stderr.on("data", (chunk) => {
+  child.stderr!.on("data", (chunk) => {
     result.stderr += chunk.toString();
   });
 
@@ -196,6 +169,7 @@ export const claudeStreamProvider: AgentProvider = {
     // createSession is ALWAYS for new sessions (routed by generateReply).
     // Even if opts.sessionId is truthy (from sessionStore), use --session-id.
     const sessionId = opts.sessionId || crypto.randomUUID();
+    const env = buildSpawnEnv(opts);
     const args = [
       "-p",
       "--input-format", "stream-json",
@@ -203,8 +177,6 @@ export const claudeStreamProvider: AgentProvider = {
       "--verbose",
       "--replay-user-messages",
       "--permission-mode", process.env.CLAUDE_PERMISSION_MODE || "bypassPermissions",
-      "--strict-mcp-config",
-      "--mcp-config", getSenderMCPConfig(),
       "--session-id", sessionId,
     ];
 
@@ -212,7 +184,7 @@ export const claudeStreamProvider: AgentProvider = {
     parser.onProgress = opts.onProgress;
     parser.onSessionId = opts.onSessionId;
 
-    const sr = spawnStream(args, opts.cwd, parser);
+    const sr = spawnStream(args, opts.cwd, parser, env);
 
     // Send user prompt on stdin (keep pipe open for future approve/deny)
     const userMsg = JSON.stringify({
@@ -239,6 +211,7 @@ export const claudeStreamProvider: AgentProvider = {
     sessionId: string,
     opts: ResumeSessionOptions,
   ): Promise<SessionOutput> {
+    const env = buildSpawnEnv(opts);
     const args = [
       "-p",
       "--input-format", "stream-json",
@@ -246,15 +219,13 @@ export const claudeStreamProvider: AgentProvider = {
       "--verbose",
       "--replay-user-messages",
       "--permission-mode", process.env.CLAUDE_PERMISSION_MODE || "bypassPermissions",
-      "--strict-mcp-config",
-      "--mcp-config", getSenderMCPConfig(),
       "--resume", sessionId,
     ];
 
     const parser = new ClaudeStreamParser();
     parser.onProgress = opts.onProgress;
 
-    const sr = spawnStream(args, opts.cwd, parser);
+    const sr = spawnStream(args, opts.cwd, parser, env);
 
     const userMsg = JSON.stringify({
       type: "user",
@@ -326,6 +297,7 @@ export function createStreamSession(
   // 区分新 session (--session-id) vs 续接已有 session (--resume)
   const isResume = !!opts.sessionId;
   const sessionId = opts.sessionId || crypto.randomUUID();
+  const env = buildSpawnEnv(opts);
   const args = [
     "-p",
     "--input-format", "stream-json",
@@ -333,8 +305,6 @@ export function createStreamSession(
     "--verbose",
     "--replay-user-messages",
     "--permission-mode", process.env.CLAUDE_PERMISSION_MODE || "bypassPermissions",
-    "--strict-mcp-config",
-    "--mcp-config", getSenderMCPConfig(),
     isResume ? "--resume" : "--session-id", sessionId,
   ];
 
@@ -346,7 +316,7 @@ export function createStreamSession(
     parser.onPermissionRequest = opts.onPermissionRequest;
   }
 
-  const sr = spawnStream(args, opts.cwd, parser);
+  const sr = spawnStream(args, opts.cwd, parser, env);
 
   // Send user prompt on stdin (keep pipe open)
   const userMsg =

@@ -45,6 +45,8 @@ export async function generateReply(
         timeoutMs,
         mcpConfigPath: "",
         permissionMode,
+        botToken: opts.botToken,
+        appToken: opts.appToken,
         onProgress: opts.onProgress,
       });
       return { ok: r.ok, text: r.text, error: r.error };
@@ -56,6 +58,8 @@ export async function generateReply(
       mcpConfigPath: "",
       permissionMode,
       sessionId: opts.sessionId,
+      botToken: opts.botToken,
+      appToken: opts.appToken,
       onProgress: opts.onProgress,
     });
     return { ok: r.ok, text: r.text, error: r.error };
@@ -102,6 +106,8 @@ export async function generateReplyStream(
       // 同 generateReply：env 在调用点读，避开模块顶层冻结。
       permissionMode: process.env.CLAUDE_PERMISSION_MODE || "bypassPermissions",
       sessionId: opts.sessionId,
+      botToken: opts.botToken,
+      appToken: opts.appToken,
       onProgress: opts.onProgress,
       // P1-4 fix: 构造时绑定，消除 spawn 后绑定竞态
       onPermissionRequest: opts.onPermission

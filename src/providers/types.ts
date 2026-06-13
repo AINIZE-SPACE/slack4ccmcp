@@ -17,6 +17,9 @@ export interface CreateSessionOptions {
   permissionMode: string;
   /** 预分配的 session ID（CC: UUID，Codex: 留空，由 spawn 输出 thread_id 回填） */
   sessionId?: string;
+  /** Per-profile Slack tokens for MCP config generation (STORY-7). */
+  botToken?: string;
+  appToken?: string;
   onProgress?: (label: string) => void;
   /** session ID 确定后回调（CC: spawn 前已知；Codex: spawn 后从 JSONL 回填） */
   onSessionId?: (sessionId: string) => void;
@@ -70,7 +73,7 @@ export interface AgentProvider {
   /** 列出本机已有 session（用于 /sessions 等命令，暂未实现） */
   listSessions?(projectDir?: string): Promise<AgentSessionInfo[]>;
 
-  /** 生成 sender-only MCP config 文件，返回文件路径 */
+  /** 生成 MCP config 文件，返回文件路径 */
   generateMCPConfig?(): string;
 }
 
@@ -121,6 +124,9 @@ export interface ReplyEngineOptions {
   cwd?: string;
   sessionId?: string;
   resume?: boolean;
+  /** Per-profile tokens (STORY-7). */
+  botToken?: string;
+  appToken?: string;
   onProgress?: (label: string) => void;
 }
 

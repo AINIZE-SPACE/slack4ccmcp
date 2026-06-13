@@ -191,7 +191,7 @@ GATEWAY_PLATFORMS=slack,feishu  # 默认只 slack
    - 飞书消息 → reply-engine → 飞书回复（DM 场景）
 3. **飞书 MCP Tools**
    - `src/tools/feishu-*.ts` 工具集
-   - sender-only 飞书 MCP 配置生成
+   - 仅含 Web API 工具的飞书 MCP 配置生成
 4. **飞书命令支持**
    - 通过消息关键词模拟 slash command（`/cc_new`、`/cc_sessions` 等）
 5. **文档 + 飞书 App 配置向导**
