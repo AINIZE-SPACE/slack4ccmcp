@@ -232,5 +232,5 @@ test clone 的 `docs/tests/` 暂未同步（小克 fetch 后可同步）。
 
 **Reviewer:** xiaoma (小马)
 **关联 PR:** #39
-**关联 issues:** #40 (STORY-9 epic), #TBD (本评审新开 P0/P1)
+**关联 issues:** #40 (STORY-9 epic), #41-#46 (本评审新开 P0x2 / P1x2 / P2x2)
 **生成时间:** 2026-06-13
