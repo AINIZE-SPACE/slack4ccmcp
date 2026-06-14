@@ -1,6 +1,7 @@
 {
   "mcpServers": {
     "chorusgate": {
+      "type": "stdio",
       "command": "chorusgate-mcp",
       "args": [],
       "env": {
@@ -9,6 +10,7 @@
       }
     },
     "trello": {
+      "type": "stdio",
       "command": "npx",
       "args": ["-y", "trello-mcp-server"],
       "env": {

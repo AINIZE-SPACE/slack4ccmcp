@@ -67,7 +67,7 @@ test("PermissionTracker auto-approves subsequent same-tool requests after sessio
   assert.equal(await p1, "session");
 
   // Second request for same tool, same session key — should auto-approve
-  const autoScope = tracker.checkAutoApproval("C123:thread_1", "Bash");
+  const autoScope = tracker.checkAutoApproval("C123:thread_1", "Bash", "U001");
   assert.equal(autoScope, "session");
 });
 
@@ -84,8 +84,67 @@ test("PermissionTracker auto-approves after 'always' scope", async () => {
   tracker.handleAction("allow_always:req_a:U001");
   assert.equal(await p1, "always");
 
-  const autoScope = tracker.checkAutoApproval("C99:t99", "Bash");
+  const autoScope = tracker.checkAutoApproval("C99:t99", "Bash", "U001");
   assert.equal(autoScope, "always");
+});
+
+// ---- SessionIdentity-aware auto-approval (P0 fix #50) -----------------------
+
+test("auto-approval respects SessionIdentity — cross-profile isolation", async () => {
+  const tracker = new PermissionTracker(5000);
+
+  // Approve "session" with profile=cc, provider=claude
+  const p1 = tracker.waitForApproval("req_cp_1", {
+    toolName: "Bash",
+    toolInput: {},
+    channel: "C",
+    threadTs: "T",
+    requesterUserId: "U",
+    sessionIdentity: "cc:claude:C:T",
+  });
+  tracker.handleAction("allow_session:req_cp_1:U");
+  assert.equal(await p1, "session");
+
+  // Same channel/thread but different profile (codex) — should NOT auto-approve
+  const auto = tracker.checkAutoApproval("codex:codex:C:T", "Bash", "U");
+  assert.equal(auto, null);
+});
+
+test("auto-approval respects SessionIdentity — cross-project isolation", async () => {
+  const tracker = new PermissionTracker(5000);
+
+  // Approve "always" with projectDir=/a
+  const p1 = tracker.waitForApproval("req_proj_1", {
+    toolName: "Bash",
+    toolInput: {},
+    channel: "C",
+    threadTs: "T",
+    requesterUserId: "U",
+  });
+  tracker.handleAction("allow_always:req_proj_1:U");
+  await p1;
+
+  // Different user in same thread — should NOT auto-approve
+  const auto = tracker.checkAutoApproval("cc:claude:C:T", "Bash", "U_other");
+  assert.equal(auto, null);
+});
+
+test("auto-approval 'always' scope works for same user across sessions", async () => {
+  const tracker = new PermissionTracker(5000);
+
+  const p1 = tracker.waitForApproval("req_xsess_1", {
+    toolName: "Bash",
+    toolInput: {},
+    channel: "C",
+    threadTs: "T1",
+    requesterUserId: "U_X",
+  });
+  tracker.handleAction("allow_always:req_xsess_1:U_X");
+  await p1;
+
+  // Same user, different thread, different profile — still auto-approves
+  const auto = tracker.checkAutoApproval("cc:claude:C:T2", "Bash", "U_X");
+  assert.equal(auto, "always");
 });
 
 // ---- deny via handleAction -------------------------------------------------

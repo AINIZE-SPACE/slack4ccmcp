@@ -554,9 +554,10 @@ async function processEvent(
           ...replyOpts,
           onPermission: async (req) => {
             // Check auto-approval cache first (session/always scope).
-            const autoKey = `${event.channel}:${replyThreadTs}`;
+            const providerId = profile?.providerId ?? "claude";
+            const sessionIdentity = `${profileId}:${providerId}:${event.channel}:${replyThreadTs}`;
             const autoScope = permissionTracker.checkAutoApproval(
-              autoKey, req.toolName,
+              sessionIdentity, req.toolName, event.user,
             );
             if (autoScope) {
               console.error(
@@ -600,6 +601,7 @@ async function processEvent(
                 channel: event.channel,
                 threadTs: replyThreadTs,
                 requesterUserId: event.user,
+                sessionIdentity,
               },
             );
             console.error(

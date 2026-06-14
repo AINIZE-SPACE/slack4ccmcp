@@ -65,6 +65,8 @@ interface PendingPermission {
   channel: string;
   threadTs: string;
   requesterUserId: string;
+  /** Session identity — scopes auto-approval to the right profile+provider. */
+  sessionIdentity: string;
   resolve: (scope: ApprovalScope) => void;
   timer: NodeJS.Timeout;
 }
@@ -102,16 +104,33 @@ export class PermissionTracker {
 
   /**
    * Check whether a tool should auto-approve based on prior approvals.
+   *
+   * Looks up two cache entries:
+   * 1. "always" scope: `${requesterUserId}:${toolName}` (per-user, global across sessions)
+   * 2. "session" scope: `${sessionIdentity}:${toolName}` (per session identity)
+   *
    * Returns the scope if auto-approved, or null if user input is needed.
    */
   checkAutoApproval(
-    sessionKey: string,
+    sessionIdentity: string,
     toolName: string,
+    requesterUserId: string,
   ): "session" | "always" | null {
-    const key = `${sessionKey}:${toolName}`;
-    const entry = this.autoApprovals.get(key);
-    if (!entry) return null;
-    return entry.scope;
+    // Check "always" scope first (broader).
+    const alwaysKey = `${requesterUserId}:${toolName}`;
+    const alwaysEntry = this.autoApprovals.get(alwaysKey);
+    if (alwaysEntry && alwaysEntry.scope === "always") {
+      return "always";
+    }
+
+    // Check "session" scope.
+    const sessionKey = `${sessionIdentity}:${toolName}`;
+    const sessionEntry = this.autoApprovals.get(sessionKey);
+    if (sessionEntry) {
+      return sessionEntry.scope;
+    }
+
+    return null;
   }
 
   /** Register a pending approval request. Returns Promise resolving to the scope. */
@@ -123,9 +142,14 @@ export class PermissionTracker {
       channel: string;
       threadTs: string;
       requesterUserId: string;
+      /** Session identity key (profileId:providerId:channel:threadTs). */
+      sessionIdentity?: string;
     },
   ): Promise<ApprovalScope> {
     this.reject(requestId, "deny");
+
+    const effectiveIdentity = details.sessionIdentity ??
+      `${details.channel}:${details.threadTs}`;
 
     return new Promise<ApprovalScope>((resolve) => {
       const timer = setTimeout(() => {
@@ -142,6 +166,7 @@ export class PermissionTracker {
         channel: details.channel,
         threadTs: details.threadTs,
         requesterUserId: details.requesterUserId,
+        sessionIdentity: effectiveIdentity,
         resolve,
         timer,
       });
@@ -172,9 +197,12 @@ export class PermissionTracker {
 
     // Register auto-approval for session/always scope
     if (scope === "session" || scope === "always") {
-      // session key = `${channel}:${threadTs}` (scope identity)
-      const sessionKey = `${pending.channel}:${pending.threadTs}`;
-      this.autoApprovals.set(`${sessionKey}:${pending.toolName}`, {
+      // session identity = `${profileId}:${providerId}:${channel}:${threadTs}`
+      // "always" entries use a profile-level key for cross-session reuse
+      const cacheKey = scope === "always"
+        ? `${pending.requesterUserId}:${pending.toolName}`
+        : `${pending.sessionIdentity}:${pending.toolName}`;
+      this.autoApprovals.set(cacheKey, {
         toolName: pending.toolName,
         scope,
         grantedAt: Date.now(),
