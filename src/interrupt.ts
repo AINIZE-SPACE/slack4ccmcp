@@ -155,6 +155,8 @@ export class InterruptManager {
         ...(threadTs ? { thread_ts: threadTs } : {}),
         text,
         link_names: true,
+        unfurl_links: false,
+        unfurl_media: false,
       });
     } catch (err) {
       console.error(

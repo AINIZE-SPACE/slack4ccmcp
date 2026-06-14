@@ -44,6 +44,8 @@ export const replyTool = {
       thread_ts: input.thread_ts,
       text: input.text,
       link_names: true,
+      unfurl_links: false,
+      unfurl_media: false,
     });
 
     if (!result.ok) {

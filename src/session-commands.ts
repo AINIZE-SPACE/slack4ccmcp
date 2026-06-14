@@ -131,6 +131,8 @@ export async function handleCommand(
       ...(ctx.threadTs ? { thread_ts: ctx.threadTs } : {}),
       text,
       link_names: true,
+      unfurl_links: false,
+      unfurl_media: false,
     });
 
   const scopeKey = formatIdentityKey(id);

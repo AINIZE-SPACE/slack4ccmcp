@@ -492,6 +492,8 @@ async function processEvent(
           thread_ts: replyThreadTs,
           text: HEARTBEAT_PHRASES[0],
           link_names: true,
+          unfurl_links: false,
+          unfurl_media: false,
         });
         placeholderTs = ph.ts as string | undefined;
       } catch {
@@ -692,6 +694,8 @@ async function processEvent(
           thread_ts: replyThreadTs,
           text: errText,
           link_names: true,
+          unfurl_links: false,
+          unfurl_media: false,
         });
       }
     } catch {
