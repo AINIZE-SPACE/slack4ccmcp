@@ -1,8 +1,8 @@
 {
   "mcpServers": {
     "chorusgate": {
-      "command": "cmd",
-      "args": ["/c", "chorusgate-mcp"],
+      "command": "chorusgate-mcp",
+      "args": [],
       "env": {
         "SLACK_BOT_TOKEN": "${SLACK_BOT_TOKEN}",
         "SLACK_APP_TOKEN": "${SLACK_APP_TOKEN}"
