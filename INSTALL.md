@@ -81,6 +81,44 @@ Then, in Slack: invite the bot to a channel (`/invite @ChorusGate`),
 
 ---
 
+## 7. Set up MCP server (Claude Code IDE integration)
+
+> 如果只在 gateway 自动回复模式下使用 ChorusGate，可跳过此步骤。
+
+要让 Claude Code IDE 对话中直接调用 Slack 工具（发消息、读频道等），需配置 MCP server。
+
+### 注册
+
+```bash
+claude mcp add --scope project chorusgate chorusgate-mcp
+```
+
+这会创建项目根的 `.mcp.json`。也可以直接复制模板：
+
+```bash
+cp .claude/mcp.json.example .mcp.json
+```
+
+### 环境变量
+
+Claude Code **不会自动读 `.env` 文件**。`.mcp.json` 中的 `${SLACK_BOT_TOKEN}` 从以下来源解析：
+
+| 场景 | 方式 |
+|------|------|
+| **生产（系统服务）** | 在 `~/.claude/settings.json` 的 `env` 块设置 `SLACK_BOT_TOKEN` / `SLACK_APP_TOKEN` |
+| **开发** | 在终端 `source .env` 后启动 Claude Code |
+| **开发（备选）** | 在项目 `.claude/settings.local.json` 的 `env` 块设置 |
+
+### 验证
+
+```bash
+claude mcp list          # 查看是否加载成功
+```
+
+`/mcp` 面板显示 chorusgate 即成功。
+
+---
+
 ## Gotchas (learned the hard way)
 
 - **One Socket Mode connection only.** Slack load-balances each event to exactly

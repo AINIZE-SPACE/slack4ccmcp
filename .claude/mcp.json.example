@@ -1,14 +1,21 @@
 {
+  "_说明": "复制此文件到项目根目录并重命名为 .mcp.json（不是 .claude/mcp.json）",
+  "_环境变量": "${VAR} 由 Claude Code 从 settings.json env 字段或进程环境解析，不会自动读 .env 文件",
+  "_生产环境": "在 ~/.claude/settings.json 的 env 块中设置 SLACK_BOT_TOKEN / SLACK_APP_TOKEN",
+  "_开发环境": "在终端 source .env 后启动 Claude Code，或在 .claude/settings.local.json 中设置",
+
   "mcpServers": {
     "chorusgate": {
-      "command": "cmd",
-      "args": ["/c", "chorusgate-mcp"],
+      "type": "stdio",
+      "command": "chorusgate-mcp",
+      "args": [],
       "env": {
         "SLACK_BOT_TOKEN": "${SLACK_BOT_TOKEN}",
         "SLACK_APP_TOKEN": "${SLACK_APP_TOKEN}"
       }
     },
     "trello": {
+      "type": "stdio",
       "command": "npx",
       "args": ["-y", "trello-mcp-server"],
       "env": {
